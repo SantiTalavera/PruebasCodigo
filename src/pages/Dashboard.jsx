@@ -1,0 +1,228 @@
+"use client"
+
+import { useState } from "react"
+import { Container, Card, Table, Badge, Button, Dropdown } from "react-bootstrap"
+import LotInfo from "../components/LotInfo"
+import { mockLots } from "../lib/data"
+
+const customStyles = `
+  .brand-gray { 
+    background-color: #f0f0f0 !important; 
+  }
+  .text-brand-dark-green { 
+    color: #0b3d23 !important; 
+  }
+  .border-brand-dark-green { 
+    border-color: #0b3d23 !important; 
+  }
+  .table-row-hover:hover { 
+    background-color: rgba(230, 239, 233, 0.5) !important; 
+    transition: all 0.15s ease;
+  }
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .status-dot-disponible { background-color: #28a745; }
+  .status-dot-vendido { background-color: #dc3545; }
+  .status-dot-reservado { background-color: #ffc107; }
+  .status-dot-construccion { background-color: #007bff; }
+  .action-btn {
+    border-radius: 8px !important;
+    transition: all 0.15s ease;
+  }
+  .action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+`
+
+export default function Dashboard({ filters, onSelectLot }) {
+  const [lotsData, setLotsData] = useState(mockLots)
+  const [showLotInfo, setShowLotInfo] = useState(false)
+  const [selectedLotId, setSelectedLotId] = useState(null)
+
+  // Filter lots based on current filters
+  const filteredLots = lotsData.filter((lot) => {
+    if (filters?.search && !lot.id.toLowerCase().includes(filters.search.toLowerCase())) return false
+    if (filters?.owner?.length > 0 && !filters.owner.includes(lot.owner)) return false
+    if (filters?.location?.length > 0 && !filters.location.includes(lot.location || "")) return false
+    if (filters?.status?.length > 0 && !filters.status.includes(lot.status)) return false
+    if (filters?.subStatus?.length > 0 && !filters.subStatus.includes(lot.subStatus)) return false
+    return true
+  })
+
+  const getStatusDotClass = (status) => {
+    switch (status) {
+      case "Disponible":
+        return "status-dot-disponible"
+      case "Vendido":
+        return "status-dot-vendido"
+      case "Reservado":
+        return "status-dot-reservado"
+      case "En Construccion":
+        return "status-dot-construccion"
+      default:
+        return "bg-secondary"
+    }
+  }
+
+  const getSubStatusVariant = (subStatus) => {
+    switch (subStatus) {
+      case "En promoción":
+        return "warning"
+      case "Reservado":
+        return "warning"
+      case "Vendido":
+        return "danger"
+      default:
+        return "success"
+    }
+  }
+
+  const handleStatusChange = (lotId, newStatus) => {
+    setLotsData((prev) => prev.map((lot) => (lot.id === lotId ? { ...lot, status: newStatus } : lot)))
+  }
+
+  const handleViewDetail = (lotId) => {
+    setSelectedLotId(lotId)
+    setShowLotInfo(true)
+  }
+
+  const handleDeleteLot = (lotId) => {
+    if (window.confirm("¿Está seguro de eliminar este lote?")) {
+      setLotsData((prev) => prev.filter((lot) => lot.id !== lotId))
+      alert("Lote eliminado")
+    }
+  }
+
+  return (
+    <>
+      <style>{customStyles}</style>
+      <Container className="py-4">
+        <Card style={{ borderRadius: "12px", boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
+          <Card.Body className="p-0">
+            <Table hover responsive className="mb-0">
+              <thead className="brand-gray">
+                <tr>
+                  <th width="50" className="p-3"></th>
+                  <th className="p-3">ID</th>
+                  <th className="p-3">Estado</th>
+                  <th className="p-3">Sub-Estado</th>
+                  <th className="p-3">Propietario</th>
+                  <th className="p-3">Ubicación</th>
+                  <th className="p-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLots.map((lot) => (
+                  <tr key={lot.id} className="table-row-hover">
+                    <td className="p-3">
+                      <div className={`status-dot ${getStatusDotClass(lot.status)}`}></div>
+                    </td>
+                    <td className="p-3">
+                      <Badge bg="light" text="dark" className="px-3 py-2" style={{ borderRadius: "12px" }}>
+                        {lot.id}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <Dropdown>
+                        <Dropdown.Toggle
+                          variant="outline-secondary"
+                          size="sm"
+                          className="action-btn"
+                          style={{ minWidth: "140px" }}
+                        >
+                          {lot.status}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu style={{ borderRadius: "12px" }}>
+                          {["Disponible", "Vendido", "Reservado", "En Construccion"].map((status) => (
+                            <Dropdown.Item
+                              key={status}
+                              onClick={() => handleStatusChange(lot.id, status)}
+                              style={{ transition: "all 0.15s ease" }}
+                            >
+                              {status}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </td>
+                    <td className="p-3">
+                      <Badge
+                        bg={getSubStatusVariant(lot.subStatus)}
+                        className="px-3 py-2"
+                        style={{ borderRadius: "12px" }}
+                      >
+                        {lot.subStatus}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <Badge
+                        variant="outline-success"
+                        className="border-brand-dark-green text-brand-dark-green px-3 py-2"
+                        style={{ borderRadius: "12px" }}
+                      >
+                        {lot.owner}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <small className="text-muted">{lot.location}</small>
+                    </td>
+                    <td className="p-3">
+                      <div className="d-flex gap-1 flex-wrap">
+                        <Button
+                          variant="outline-success"
+                          size="sm"
+                          className="action-btn"
+                          onClick={() => alert(`Registrar venta ${lot.id}`)}
+                        >
+                          Registrar venta
+                        </Button>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="action-btn"
+                          onClick={() => handleViewDetail(lot.id)}
+                        >
+                          <i className="bi bi-eye"></i>
+                        </Button>
+                        <Button
+                          variant="outline-warning"
+                          size="sm"
+                          className="action-btn"
+                          onClick={() => alert(`Editar ${lot.id}`)}
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="action-btn"
+                          onClick={() => handleDeleteLot(lot.id)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            {filteredLots.length === 0 && (
+              <div className="text-center py-5">
+                <i className="bi bi-info-circle text-muted" style={{ fontSize: "2rem" }}></i>
+                <p className="text-muted mt-3 mb-0">No se encontraron lotes que coincidan con los filtros aplicados.</p>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+
+        <LotInfo show={showLotInfo} onHide={() => setShowLotInfo(false)} selectedLotId={selectedLotId} />
+      </Container>
+    </>
+  )
+}
