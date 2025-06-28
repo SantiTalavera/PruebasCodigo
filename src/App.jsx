@@ -6,12 +6,15 @@ import Map from "./pages/Map"
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/map" element={<Map />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Layout es la ruta "padre". Siempre estará visible. */}
+        <Route path="/" element={<Layout />}>
+          {/* Estas son las rutas "hijas". Se mostrarán dentro de Layout. */}
+          {/* `index` significa que Dashboard es la ruta por defecto para "/" */}
+          <Route index element={<Dashboard />} />
+          <Route path="map" element={<Map />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   )
 }
