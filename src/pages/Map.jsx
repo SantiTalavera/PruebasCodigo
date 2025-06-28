@@ -1,64 +1,7 @@
-{/*
-"use client"
-
-
 import { useState } from "react"
 import { Container } from "react-bootstrap"
 import { mockLots } from "../lib/data"
-
-
-export default function Map({ onParcelClick }) {
-  const [hoveredParcel, setHoveredParcel] = useState(null)
-
-  const handleParcelClick = (lotId) => {
-    if (onParcelClick) {
-      onParcelClick(lotId)
-    }
-  }
-
-  return (
-    <>
-      <style>{customStyles}</style>
-      <Container fluid className="py-4">
-        <div className="map-container">
-          <img
-            src="https://lafederalaclub.com/contenidos/uploads/2025/04/Plano-con-Vendidos.jpg"
-            alt="Mapa del Club de Campo La Federala"
-            className="img-fluid w-100 h-100"
-            style={{ objectFit: "contain" }}
-          />
-
-          {/* Clickable Parcels */}{/*}
-          {mockLots.slice(0, 4).map((lot, index) => (
-            <div
-              key={lot.id}
-              className="parcel-overlay"
-              style={{
-                top: `${25 + index * 15}%`,
-                left: `${30 + index * 10}%`,
-              }}
-              onMouseEnter={() => setHoveredParcel(lot.id)}
-              onMouseLeave={() => setHoveredParcel(null)}
-              onClick={() => handleParcelClick(lot.id)}
-            >
-              <div className="parcel-label">{lot.id}</div>
-            </div>
-          ))}
-        </div>
-      </Container>
-    </>
-  )
-}
-
-*/}
-
-// pages/Map.jsx
-"use client"
-
-import { useState } from "react"
-import { Container } from "react-bootstrap"
-import { mockLots } from "../lib/data"
-import SidePanel from "../components/SidePanel"  // <-- importa tu panel
+import SidePanel from "../components/SidePanel"  
 import LotInfo from "../components/LotInfo"
 
 const customStyles = `
@@ -107,11 +50,9 @@ const customStyles = `
 `
 
 export default function Map() {
-  // SidePanel
   const [selectedLotId, setSelectedLotId] = useState(null)
   const [showPanel,   setShowPanel]   = useState(false)
 
-  // LotInfo
   const [showInfo,    setShowInfo]    = useState(false)
 
   const handleParcelClick = (id) => {
@@ -120,14 +61,12 @@ export default function Map() {
   }
   const handleClosePanel = () => {
     setShowPanel(false)
-    // opcional: no borrar selectedLotId, si quieres reabrir
   }
 
   const handleViewDetail = (id) => {
-    // cuando se pulsa “Ver detalle completo” en el SidePanel
     setSelectedLotId(id)
-    setShowPanel(false)   // cerramos SidePanel
-    setShowInfo(true)     // abrimos LotInfo
+    setShowPanel(false)  
+    setShowInfo(true)    
   }
   const handleCloseInfo = () => {
     setShowInfo(false)
@@ -168,7 +107,7 @@ export default function Map() {
         show={showPanel}
         onHide={handleClosePanel}
         selectedLotId={selectedLotId}
-        onViewDetail={handleViewDetail}  // <- aquí enlazamos con LotInfo
+        onViewDetail={handleViewDetail} 
       />
 
       <LotInfo

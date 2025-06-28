@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Container, Card, Table, Badge, Button, Dropdown } from "react-bootstrap"
 import LotInfo from "../components/LotInfo"
